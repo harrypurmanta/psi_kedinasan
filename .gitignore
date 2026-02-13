@@ -1,0 +1,30 @@
+# === CI4 System ===
+kedinasan/writable/*
+!/writable/.gitkeep
+
+# === Environment ===
+.env
+
+# === Composer ===
+kedinasan/vendor/
+
+# === Cache & Logs ===
+kedinasan/writable/cache/*
+kedinasan/writable/logs/*
+kedinasan/writable/debugbar/*
+kedinasan/writable/session/*
+kedinasan/writable/uploads/*
+
+# === User Uploads (optional) ===
+kedinasan/public/uploads/*
+!/public/uploads/.gitkeep
+
+# === OS & Editor ===
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# === Test & Temp ===
+*.log
+*.tmp
