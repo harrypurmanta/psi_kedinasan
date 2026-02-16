@@ -787,4 +787,14 @@ public function getAllSoalSK() {
                         ->where('created_user_id',$user_id)
                         ->update();
     }
+
+    public function updateFinishRespon($materi_id,$group_id,$user_id,$data) {
+        return $this->db->table('respon')
+                        ->set($data)
+                        ->where('materi',$materi_id)
+                        ->where('group_id',$group_id)
+                        ->where('created_user_id',$user_id)
+                        ->where('status_cd','normal')
+                        ->update();
+    }
 }

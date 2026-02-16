@@ -30,14 +30,13 @@ class Tryout extends BaseController
         $request = \Config\Services::request();
         $materi_id = $request->uri->getSegment(3);
         $data['group'] = $this->soalmodel->getGroup()->getResult();
-        if ($request->uri->getSegment(4) == 4) {
+        if ($request->uri->getSegment(4) == 10) {
             $kolom_id = 1;
         } else {
             $kolom_id = 0;
         }
         
         $data['soal'] = $this->soalmodel->getSoal(1,$request->uri->getSegment(4),$materi_id,$kolom_id)->getResult();
-        // print_r($data['soal']);exit;
         $data['jawaban'] = $this->soalmodel->getjawaban($data['soal'][0]->soal_id)->getResult();
         $data['total_soal'] = $this->soalmodel->getTotalSoal(1,$request->uri->getSegment(3))->getResult();
         return view('front/tryout',$data);
@@ -65,32 +64,6 @@ class Tryout extends BaseController
         } else if ($proc == "next" && $jawaban_id == "") {
             echo json_encode("jawaban_kosong");
         } else {
-            // $sl_rt = $this->soalmodel->selectRemainingTime($this->session->user_id,$materi,"tryout")->getResult();
-            // if (count($sl_rt)>0) {
-            //     if ($sl_rt[0]->isFinish == "proses" && $proc == "start") {
-            //         $cnvrt = str_replace(":","",$sl_rt[0]->remaining_time);
-            //         $sisawaktu = $cnvrt / 60;
-            //     } else {
-            //         $data = [
-            //             "remaining_time" => $waktu,
-            //             "date" => $date,
-            //             "status_cd" => "normal"
-            //         ];
-            //         $this->soalmodel->updateRemainingTime($this->session->user_id,$materi,$data,"tryout");
-            //     }
-                
-            // } else {
-            //     $data = [
-            //         "remaining_time" => $waktu,
-            //         "date" => $date,
-            //         "status_cd" => "normal",
-            //         "user_id" => $this->session->user_id,
-            //         "materi_id" => $materi,
-            //         "type" => "tryout",
-            //         "isFinish" => "proses"
-            //     ];
-            //     $this->soalmodel->insertRemainingTime($data);
-            // }
             
             if ($proc == "prev" || $proc == "prevsoal" || $proc == "start") {
 
@@ -133,13 +106,6 @@ class Tryout extends BaseController
                 }
             }
                 if ($proc == "selesai") {
-                    // $data = [
-                    //     "remaining_time" => $waktu,
-                    //     "date" => $date,
-                    //     "status_cd" => "normal",
-                    //     "isFinish" => "finish"
-                    // ];
-                    // $this->soalmodel->updateRemainingTime($this->session->user_id,$materi,$data,"tryout");
                     echo json_encode(array("proc" => $proc));
                 } else {
                     if ($proc == "prevsoal") {
@@ -157,27 +123,10 @@ class Tryout extends BaseController
                         $kolom_id = $res[0]->kolom_id;
                         $res_ttlsoal = $this->soalmodel->getTotalSoal($group_id,$materi)->getResult();
                     } 
-                    // else {
-                    //     $res_ttlsoal = $this->soalmodel->getTotalSoal($group_id,$materi)->getResult();
-                    // }
-                    // $no_soal_belum = array();
                     foreach ($res_ttlsoal as $boxsoal) {
                         $getResponBox = $this->soalmodel->getResponBox($boxsoal->soal_id,$group_id,$materi,$this->session->user_id)->getResult();
-                        if ($group_id == 2) {
-                            $boxclick = "onclick='setboxsoal($boxsoal->no_soal)'";
-                            $boxcursor = "cursor:pointer;";
-                        } else {
-                            $boxclick = "";
-                            $boxcursor = "";
-                        }
-
-                        // if ($no_soal == count($res_ttlsoal)+1) {
-                        //     $no_soal_belum[] = $boxsoal->no_soal;
-                        //     if (count($no_soal_belum)>0 && $proc == "next" && $res_ttlsoal) {
-                        //         $no_soal = $no_soal_belum[0];
-                        //     } 
-                        //     $res = $this->soalmodel->getSoal($no_soal,$group_id,$materi,$kolom_id)->getResult();
-                        // } 
+                        $boxclick = "onclick='setboxsoal($boxsoal->no_soal)'";
+                        $boxcursor = "cursor:pointer;";
 
                         if (count($getResponBox)>0) {
                             $pilihan_nm = " ".$getResponBox[0]->pilihan_nm;
@@ -241,10 +190,6 @@ class Tryout extends BaseController
 
                                 <div>$img_jwb</div>
                             </div>";
-                        
-                        // $jawaban .= "<div id='dv_jawaban_".$key->jawaban_id."' onclick='selectJawaban(".$key->jawaban_id.",\"".$key->pilihan_nm."\")' class='btn col-md-12 jawaban_dv' style='margin-top:10px;margin-bottom:10px;background-color:#aeaebb;border-radius:5px;text-align: left;'> <label for='pilihan_nm'>".$key->pilihan_nm.". </label> <span>".$key->jawaban_nm."</span>
-                        // <div>$img_jwb</div>
-                        //     </div>";
                     }
                     $button = "";
                     $getjumlahjawab = $this->soalmodel->getResponCountByMateriUser($group_id,$materi,$this->session->user_id)->getResult();
@@ -254,174 +199,124 @@ class Tryout extends BaseController
                         $jumlahjawab = 0;
                     }
                     
-                    if ($group_id == 2) {
+                    if ($no_soal == 1) {
+                        
+                    } else {
                         $button .= "<button onclick='startujian(\"prevsoal\")' style='font-size:16px;padding-left:25px;padding-right:25px;' class='btn btn-success'>Previous</button> ";
                     }
+
+                    $button .= "<button onclick='startujian(\"next\")' style='font-size:16px;padding-left:25px;padding-right:25px;' class='btn btn-success'>Next</button>";
                     
                     if ($jumlahjawab == count($res_ttlsoal) - 1) {
                         $button = "<button onclick='startujian(\"selesai\")' style='font-size:16px;padding-left:25px;padding-right:25px;' class='btn btn-success'>Selesai</button>";
-                    } else {
-                        if (count($res_ttlsoal) != $no_soal) {
-                            $button .= "<button onclick='startujian(\"next\")' style='font-size:16px;padding-left:25px;padding-right:25px;' class='btn btn-success'>Next</button>";
-                        }
-                    }
+                    } 
 
-                    // if (count($res_ttlsoal) == $no_soal) {
-                    //     $group_id = $group_id + 1;
-                    //     $button = "<button onclick='startujian(\"selesai\")' style='font-size:16px;padding-left:25px;padding-right:25px;' class='btn btn-success'>Selesai</button>";
-                    // } else {
-                        
-                    // }
                     echo json_encode(array("soal_id"=>$soal_id, "soal_nm" => $soal_nm,"no_soal"=>$no_soal, "group_id"=>$group_id,"kolom_id"=>$kolom_id, "jawaban_nm" => $jawaban, "boxnomorsoal" => $boxnomorsoal, "button" => $button, "proc" => $proc, "img_soal"=>$img_soal,"jawaban_idx"=>$jawaban_idx,"pilihan_nms"=>$pilihan_nms,"jumlah_jawab"=>$jumlahjawab));
                 }
         }
         
     }
 
-    public function sikapkerja() {
+    public function ujianPauli() {
         $request = \Config\Services::request();
-        $data['group'] = $this->soalmodel->getGroup()->getResult();
-        $materi_id = $request->uri->getSegment(3);
-        $group_id = $request->uri->getSegment(4);
-        return view('front/sikapkerja',$data);
+        $data["materi_id"]  = $request->uri->getSegment(3);
+        $data["group_id"]   = $request->uri->getSegment(4);
+        $kolom_id = 0;
+        
+        return view('front/pauli/ujian',$data);
     }
 
-    public function sikapkerjaujian() {
-        $request = \Config\Services::request();
-        $proc = $this->request->getPost("proc");
-        $soal_id = $this->request->getPost("soal_id");
-        $jawaban_id = $this->request->getPost("jawaban_id");
-        $group_id = $this->request->getPost("group_id");
-        $no_soal = $this->request->getPost("no_soal");
-        $pilihan_nm = $this->request->getPost("pilihan_nm");
-        $kolom_id = $this->request->getPost("kolom_id");
-        $materi = $this->request->getPost("materi");
+    public function pauliujian() {
+        $req = $this->request;
+
+        $proc        = $req->getPost("proc");
+        $soal_id     = $req->getPost("soal_id");
+        $jawaban_id  = $req->getPost("jawaban_id");
+        $group_id    = $req->getPost("group_id");
+        $no_soal     = (int)$req->getPost("no_soal");
+        $pilihan_nm  = $req->getPost("pilihan_nm");
+        $kolom_id    = (int)$req->getPost("kolom_id");
+        $materi      = $req->getPost("materi");
+        $sk_group_id = (int)$req->getPost("sk_group_id");
+        
+        $user_id = $this->session->user_id;
+        
         $date = date("Y-m-d H:i:s");
-        if (isset($jawaban_id)) {
-            $data = [
-                "jawaban_id" => $jawaban_id,
-                "pilihan_nm" => $pilihan_nm,
-                "soal_id" => $soal_id,
-                "no_soal" => $no_soal,
-                "group_id" => $group_id,
-                "materi" => $materi,
-                "used" => 0,
-                "kolom_id" => $kolom_id,
-                "created_user_id" => $this->session->user_id,
-                "created_dttm" => $date,
-                "session" => $this->session->session
-            ];
-            $respon_id = $this->soalmodel->simpanRespon($data);
+
+        if (!$this->session->has('used')) {
+            $this->session->set('used', 1);
         }
-        $no_soal = $no_soal + 1;
-        // if ($proc == "start") {
-        //     $kolom_id = $kolom_id + 1;
-        // } 
 
-        if ($proc == "persiapan") {
-            echo json_encode(array("ret"=>"persiapan", "kolom"=>$kolom_id));
-        } else if ($no_soal == 51 && $group_id == 4 && $kolom_id <= 10) {
-            echo json_encode(array("ret"=>"persiapan", "kolom"=>$kolom_id));
-        } else if ($group_id == 4 && $kolom_id == 11) {
-            echo json_encode(array("ret"=>"selesai"));
-        } else {
-            $res = $this->soalmodel->getSoal($no_soal,$group_id,$materi,$kolom_id)->getResult();
-            if (count($res)>0) {
-                $ret = "<div class='col-md-12'>
-                    <table border='0' style='margin: 0 auto;'>
-                        <tbody>
-                            <tr style='font-size:75px;font-weight:bold;text-align:center;'>";
-                            if ($res[0]->typesoal == "gambar") {
-                                $getjawaban = $this->soalmodel->getjawaban($res[0]->soal_id)->getResult();
-                                foreach ($getjawaban as $key) {
-                                    $jawaban_nm = explode('|', $key->jawaban_nm);
-                                    foreach ($jawaban_nm as $jwb_nm) {
-                                        $src = base_url("images/soalskmateri/materi/$materi/kolom/$kolom_id/$jwb_nm");
-                                        $ret .= "<td width='70'><img src='$src' style='height: 100px; width: 100px; margin: 5px;'></td>";
-                                    }
-                                }
-                            } else {
-                                $getjawaban = $this->soalmodel->getjawaban($res[0]->soal_id)->getResult();
-                                foreach ($getjawaban as $key) {
-                                    $jawaban_nm = str_split($key->jawaban_nm,1);
-                                    foreach ($jawaban_nm as $jwb_nm) {
-                                        $ret .= "<td width='70'>$jwb_nm</td>";
-                                    }
-                                }
-                            }
-
-                            // $getjawaban = $this->soalmodel->getjawaban($res[0]->soal_id)->getResult();
-                            //     foreach ($getjawaban as $key) {
-                            //         $jawaban_nm = str_split($key->jawaban_nm,1);
-                            //         foreach ($jawaban_nm as $jwb_nm) {
-                            //             $ret .= "<td width='70'>$jwb_nm</td>";
-                            //         }
-                            //     }
-
-                        $ret .= "</tr>
-                            <tr style='font-size:35px;font-weight:normal;text-align:center;'>
-                                <td>A</td>
-                                <td>B</td>
-                                <td>C</td>
-                                <td>D</td>
-                                <td>E</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class='col-md-12' style='width:100%; margin-top:30px;'>
-                    <label style='font-size:20px;' for='Pertanyaan'>Pertanyaan ".$no_soal."</label>
-                    <div class='col-md-12 row' style='display:flex; justify-content:center; flex-wrap:wrap;'>";
-
-                    if ($res[0]->typesoal == "gambar") {
-                        foreach ($res as $keySoal) {
-                            $soal_nm = explode('|', $keySoal->soal_nm);
-                            foreach ($soal_nm as $jwb_nm) {
-                                $src = base_url("images/soalskmateri/materi/$materi/kolom/$kolom_id/$jwb_nm");
-                                $ret .= "<img src='$src' style='height: 100px; width: 100px; margin: 5px;'>";
-                            }
-                        }
-                    } else {
-                        foreach ($res as $keySoal) {
-                            $soal_nm = str_split($keySoal->soal_nm,1);
-                            foreach ($soal_nm as $jwb_nm) {
-                                $ret .= "<div class='col-md-2' style='background-color:grey;min-height:70px;font-size:65px;font-weight:bold;text-align:center;margin:10px;display: inline-block;'>
-                        ".$jwb_nm."</div>";
-                            }
-                        }
-                    }
-                        // foreach ($res as $keySoal) {
-                        //     $soal_nm = str_split($keySoal->soal_nm,1);
-                        //     foreach ($soal_nm as $jwb_nm) {
-                        //         $ret .= "<div style='background-color:grey;min-width:70px;min-height:70px;font-size:65px;font-weight:bold;text-align:center;margin:10px;'>
-                        // ".$jwb_nm."</div>";
-                        //     }
-                        // }
-                        
-                $ret .= "</div>
-                    <div class='col-md-12' style='display:flex;'>";
-                    foreach ($getjawaban as $k) {
-                        $jawaban_id = $k->jawaban_id;
-                        $ret .= "<button onclick='startujian(\"next\",\"A\",".$jawaban_id.",".$res[0]->soal_id.",$group_id,$no_soal,$kolom_id,$materi)' style='margin:5px;font-weight:bold;font-size: 20px;'
-                        class='btn btn-block btn-outline-success'>A</button>
-                    <button onclick='startujian(\"next\",\"B\",".$jawaban_id.",".$res[0]->soal_id.",$group_id,$no_soal,$kolom_id,$materi)' style='margin:5px;font-weight:bold;font-size: 20px;'
-                        class='btn btn-block btn-outline-success'>B</button>
-                    <button onclick='startujian(\"next\",\"C\",".$jawaban_id.",".$res[0]->soal_id.",$group_id,$no_soal,$kolom_id,$materi)' style='margin:5px;font-weight:bold;font-size: 20px;'
-                        class='btn btn-block btn-outline-success'>C</button>
-                    <button onclick='startujian(\"next\",\"D\",".$jawaban_id.",".$res[0]->soal_id.",$group_id,$no_soal,$kolom_id,$materi)' style='margin:5px;font-weight:bold;font-size: 20px;'
-                        class='btn btn-block btn-outline-success'>D</button>
-                    <button onclick='startujian(\"next\",\"E\",".$jawaban_id.",".$res[0]->soal_id.",$group_id,$no_soal,$kolom_id,$materi)' style='margin:5px;font-weight:bold;font-size: 20px;'
-                        class='btn btn-block btn-outline-success'>E</button>";
-                    }
-                        
-                $ret .= "</div>
-                </div>";
-                echo json_encode(array("ret"=>$ret, "kolom"=>$kolom_id,"group_id"=>$group_id,"no_soal"=>$no_soal));
+        if ($jawaban_id != "") {
+            $data = [
+                "jawaban_id"      => $jawaban_id,
+                "pilihan_nm"      => $pilihan_nm,
+                "soal_id"         => $soal_id,
+                "no_soal"         => $no_soal,
+                "group_id"        => $group_id,
+                "materi"          => $materi,
+                "used"            => $this->session->used,
+                "kolom_id"        => $kolom_id,
+                "created_user_id" => $user_id,
+                "created_dttm"    => $date,
+                "session"         => $this->session->session
+            ];
+            
+            $exists = $this->soalmodel->getResponPauli($soal_id, $group_id, $materi, $user_id, $sk_group_id)->getResult();
+            
+            if (count($exists) > 0) {
+                $updaterespon = $this->soalmodel->updateResponPauli($soal_id,$group_id,$materi,$user_id,$sk_group_id,$data);
             } else {
-                $ret = "soal_tidak_ada";
-                echo json_encode(array("ret"=>$ret));
+                $this->soalmodel->simpanResponSK($data);
             }
         }
+        
+        $no_soal++;
+
+        if ($proc === "persiapan" || $no_soal == 51 && $group_id == 9 && $kolom_id <= 20 && $sk_group_id <= 4) {
+            return $this->response->setJSON([
+                "ret" => "persiapan",
+                "kolom_id" => $kolom_id,
+                "sk_group_id" => $sk_group_id
+            ]);
+        }
+
+        if ($proc === "selesai") {
+            return $this->response->setJSON(["ret" => "selesai"]);
+        }
+        
+        $soal = $this->soalmodel->getSoalPauliFast($no_soal, $group_id, $materi, $kolom_id, $sk_group_id);
+
+        if (!$soal) {
+            return $this->response->setJSON(["ret" => "soal_tidak_ada"]);
+        }
+
+        $jawaban = $this->soalmodel->getjawabanPauli($soal->soal_id)->getResult();
+
+        return $this->response->setJSON([
+            "ret" => "ok",
+            "no_soal" => $no_soal,
+            "kolom_id" => $kolom_id,
+            "group_id" => $group_id,
+            "sk_group_id" => $sk_group_id,
+            "data_soal" => [
+                "soal_id" => $soal->soal_id,
+                "soal_nm" => $soal->soal_nm,
+                "jawaban" => $jawaban
+            ]
+        ]);
+    }
+
+    public function updateFinishRespon() {
+        $materi_id = $this->request->getPost("materi_id");
+        $group_id = $this->request->getPost("group_id");
+        $user_id = $this->session->user_id;
+        $data = [
+            "status_cd" => "finish"
+        ];
+        $reset = $this->soalmodel->updateFinishRespon($materi_id,$group_id,$user_id,$data);
+
+        echo json_encode($reset);exit;
     }
 
     public function hasiltryout() {

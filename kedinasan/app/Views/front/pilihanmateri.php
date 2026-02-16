@@ -28,28 +28,55 @@
                                 <h3 style="text-decoration: underline;"><b><?= $group[0]->group_nm ?></b></h3>
                                 
                                 <?php
-                                    if ($group[0]->group_soal_id == 1) {
-                                        echo " <p style='text-align:center;font-size:20px;'>Jawablah Setiap Pertanyaan dengan jujur, sesuai dengan kenyataan yang ada pada diri anda sendiri.</p>";
-                                    } else if ($group[0]->group_soal_id == 2) {
+                                    if ($group[0]->group_soal_id == 10) {
                                         echo "<p style='text-align:center;font-size:20px;margin:20px;'>Jawablah pertanyaan di bawah ini dengan memilih pilihan jawaban yang paling  tepat!</p>";
-                                    } else if ($group[0]->group_soal_id == 3) {
-                                        echo "<p style='text-align:center;font-size:20px;margin:20px;'>Soal terdiri dari 10 kolom, dimana setiap kolom ada batas waktu 1 menit. Pilihlah (angka,huruf,symbol) yang hilang dari soal. Gunakan waktu sebaik mungkin dalam pengerjaannya.</p>";
-                                    } else if ($group[0]->group_soal_id == 4) {
-                                        echo "<p style='text-align:center;font-size:20px;margin:20px;'>Perhatikan gambar dibawah ini, kemudian pilihlah karakter jawaban yang paling tepat dari beberapa pilihan jawaban yang tersedia.</p>";
+                                    } else  {
+                                        echo "<p style='text-align:center;font-size:20px;margin:20px;'>Jawablah pertanyaan di bawah ini dengan memilih pilihan jawaban yang paling  tepat!</p>";
                                     }
                                 ?>
                                 <p>Saat anda klik tombol <b><i>Mulai</i></b>, Maka akan langsung masuk ke Pengerjaan soal Selamat Mengerjakan</p>
                                 <?php
-                                    if ($group[0]->group_soal_id == 4) {
-                                        echo "<a href='".base_url()."/tryout/sikapkerja/".$materi_id."/".$group[0]->group_soal_id."' class='btn btn-success' style='font-size:18px;'>Mulai</a>";
+                                    if ($group[0]->group_soal_id == 10) {
+                                        echo "<a onclick='showtoken(".$group[0]->group_soal_id.", ".$materi_id.")' href='#' class='btn btn-success' style='font-size:18px;'>Mulai</a>";
                                     } else {
-                                        echo "<a href='".base_url()."/tryout/ujian/".$materi_id."/".$group[0]->group_soal_id."' class='btn btn-success' style='font-size:18px;'>Mulai</a>";
+                                        echo "<a onclick='showtoken(".$group[0]->group_soal_id.", ".$materi_id.")' href='#' class='btn btn-success' style='font-size:18px;'>Mulai</a>";
                                     }
                                 ?>
                             </div>
                         </div>
                     </div>
                 </section>
+            </div>
+        </div>
+        <div class="modal fade" id="modal-token">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header bg-blue">
+                        <!-- <h4>Masukkan Token</h4> -->
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="modal_body" class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="token">Token</label>
+                                        <input class="form-control" type="text" name="token" id="token" placeholder="Masukkan Token" maxlength="6" minlength="6" autocomplete="off">
+                                        <input class="form-control" type="hidden" name="group_idx" id="group_idx">
+                                        <input class="form-control" type="hidden" name="materi_id" id="materi_id">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <button style="margin-top: 25px;" class="btn btn-primary" type="button" onclick="checktoken()">Next</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <?= $this->include('front/footer') ?>
@@ -60,6 +87,49 @@
     <script src="<?= base_url() ?>/bower_components/fastclick/lib/fastclick.js"></script>
     <script src="<?= base_url() ?>/dist/js/adminlte.min.js"></script>
     <script src="<?= base_url() ?>/dist/js/demo.js"></script>
+    <script>
+        function showtoken(group_id, materi_id) {
+            $("#token").val("");
+            $("#group_idx").val(group_id);
+            $("#materi_id").val(materi_id);
+            $("#modal-token").modal("show");
+        }
+
+        function checktoken() {
+            var token = $("#token").val();
+            var group_id = $("#group_idx").val();
+            var materi_id = $("#materi_id").val();
+            $.ajax({
+                url: "<?= base_url('token/checktoken') ?>",
+                type: "post",
+                dataType: "json",
+                data: {
+                    "token": token,
+                    "group_id": group_id,
+                    "materi_id": materi_id
+                },
+                beforeSend: function() {
+                    $("#loader-wrapper").removeClass("d-none");
+                },
+                success: function(data) {
+                    if (data == "sukses") {
+                        if (group_id == 10) {
+                            window.location.href = "<?= base_url() ?>/tryout/ujianPauli/"+materi_id+"/"+group_id;
+                        } else {
+                            window.location.href = "<?= base_url() ?>/tryout/ujian/"+materi_id+"/"+group_id;
+                        } 
+                    } else {
+                        alert("Token salah/tidak ada, hubungi administrator");
+                    }
+                    $("#loader-wrapper").addClass("d-none");
+                },
+                error: function() {
+                    alert("Error");
+                    $("#loader-wrapper").addClass("d-none");
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

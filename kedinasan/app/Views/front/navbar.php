@@ -24,15 +24,6 @@ $session = \Config\Services::session();
                             <li class='nav-item'>
                                 <a href='".base_url()."/materi' class='nav-link'>Materi</a>
                             </li>
-                            <li class='nav-item'>
-                                <a href='".base_url()."/pembahasan' class='nav-link'>Pembahasan</a>
-                            </li>
-                            <li class='nav-item'>
-                                <a href='".base_url()."/sikapkerja' class='nav-link'>Sikap Kerja</a>
-                            </li>
-                            <li class='nav-item'>
-                                <a href='".base_url()."/latihan' class='nav-link'>Latihan Soal</a>
-                            </li>
                         </ul>
                     </div>";
             } else if ($request->uri->getSegment(2) !== "hasiltryout") {

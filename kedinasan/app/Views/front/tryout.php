@@ -333,18 +333,36 @@ $request = \Config\Services::request();
                     } else {
                         if (data.group_id == 1 && data.no_soal == 1) {
                             window.clearInterval(timers);
-                            countdown(2700);
+                            countdown(180);
                         } else if (data.group_id == 2 && data.no_soal == 1) {
                             window.clearInterval(timers);
-                            countdown(5400);
+                            countdown(180);
                         } else if (data.group_id == 3 && data.no_soal == 1) {
                             window.clearInterval(timers);
-                            countdown(2700);
+                            countdown(60);
                         } else if (data.group_id == 4 && data.no_soal == 1) {
                             window.clearInterval(timers);
-                            countdown(60);
+                            countdown(300);
+                        } else if (data.group_id == 5 && data.no_soal == 1) {
+                            window.clearInterval(timers);
+                            countdown(180);
+                        } else if (data.group_id == 6 && data.no_soal == 1) {
+                            window.clearInterval(timers);
+                            countdown(300);
+                        } else if (data.group_id == 7 && data.no_soal == 1) {
+                            window.clearInterval(timers);
+                            countdown(300);
+                        } else if (data.group_id == 8 && data.no_soal == 1) {
+                            window.clearInterval(timers);
+                            countdown(300);
+                        } else if (data.group_id == 9 && data.no_soal == 1) {
+                            window.clearInterval(timers);
+                            countdown(3600);
+                        } else if (data.group_id == 10 && data.no_soal == 1) {
+                            window.clearInterval(timers);
+                            countdown(300);
                         }
-
+ 
                         $("#inp_soal_id").val(data.soal_id);
                         $("#inp_soal_nm").text(data.soal_nm);
                         $("#p_no_soal").text("Soal no. " + data.no_soal);
@@ -362,17 +380,12 @@ $request = \Config\Services::request();
                         }, 10);
                         
                     }
-
-                    // $("#loader-wrapper").addClass("d-none");
-
                 }
-
 
                 let dv = document.getElementsByClassName("jawaban_dv");
                 for (let index = 0; index < dv.length; index++) {
                     dv[index].style.border = "none";
                 }
-
 
             },
             error: function() {
