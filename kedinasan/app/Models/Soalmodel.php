@@ -797,4 +797,64 @@ public function getAllSoalSK() {
                         ->where('status_cd','normal')
                         ->update();
     }
+
+    public function getKolomSoalPauli() {
+        return $this->db->table('soal a')
+                        ->select('a.kolom_id')
+                        // ->join('kolom_soal b','b.kolom_id = a.kolom_id')
+                        ->where('a.status_cd','normal')
+                        ->where('a.group_id', 9)
+                        // ->orderBy('a.soal_id', 'ASC')
+                        ->groupBy('a.kolom_id')
+                        ->get();
+    }
+
+    public function getSoalPauliFast($no_soal, $group_id, $materi, $kolom_id, $sk_group_id)
+    {
+        return $this->db->table('soal')
+            ->select('soal_id, soal_nm')
+            ->where([
+                'no_soal'     => $no_soal,
+                'group_id'    => $group_id,
+                'materi'      => $materi,
+                'kolom_id'    => $kolom_id,
+                'sk_group_id' => $sk_group_id,
+                'status_cd'   => 'normal'
+            ])
+            ->limit(1)
+            ->get()
+            ->getRow();
+    }
+
+    public function getjawabanPauli($soal_id) {
+        return $this->db->table('jawaban')
+                        ->select('*')
+                        ->where('soal_id', $soal_id)
+                        ->where('status_cd','normal')
+                        ->orderBy('(jawaban_nm = 0), jawaban_nm', '', false)
+                        ->get();
+    }
+
+    public function getResponPauli($soal_id,$group_id,$materi,$user_id,$sk_group_id) {
+        return $this->db->table('respon a')
+                        ->select('*')
+                        ->join('soal b','b.soal_id=a.soal_id')
+                        ->where('a.soal_id',$soal_id)
+                        ->where('a.group_id',$group_id)
+                        ->where('a.materi',$materi)
+                        ->where('a.created_user_id',$user_id)
+                        ->where('a.status_cd', 'normal')
+                        ->where('b.sk_group_id',$sk_group_id)
+                        ->get();
+    }
+
+    public function updateResponPauli($soal_id,$group_id,$materi,$user_id,$sk_group_id,$data) {
+        return $this->db->table('respon')
+                        ->set($data)
+                        ->where('soal_id',$soal_id)
+                        ->where('group_id',$group_id)
+                        ->where('materi',$materi)
+                        ->where('created_user_id',$user_id)
+                        ->update();
+    }
 }
