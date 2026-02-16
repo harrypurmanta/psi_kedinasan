@@ -326,6 +326,11 @@ class Soal extends BaseController
             ];
         }
 
+        $pathJawaban = FCPATH . "images/jawaban/materi/$materi_id/group/$group_id";
+
+        if (!is_dir($pathJawaban)) {
+            mkdir($pathJawaban, 0777, true);
+        }
       
         $soal_id = $this->soalmodel->simpansoal($data);
         if ($soal_id) {
@@ -333,7 +338,7 @@ class Soal extends BaseController
                 $imgA = $imagefile['jawaban_img_A'][0];
                 if ($imgA->isValid() && ! $imgA->hasMoved()){
                      $jawaban_img_A = $imgA->getClientName();
-                     $imgA->move("../public/images/jawaban/materi/$materi_id", $jawaban_img_A);
+                     $imgA->move("../public/images/jawaban/materi/$materi_id/group/$group_id", $jawaban_img_A);
                  }
                  $dataA = [
                     'soal_id' => $soal_id,

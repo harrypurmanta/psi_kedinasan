@@ -172,7 +172,7 @@ class Tryout extends BaseController
                         if ($key->jawaban_img == "") {
                             $img_jwb = "";
                         } else {
-                            $img_jwb = "<img style='max-width:350px;height:100%;' src='".base_url()."/images/jawaban/materi/".$res[0]->materi."/".$key->jawaban_img.".jpg'>";
+                            $img_jwb = "<img style='max-width:350px;height:100%;' src='".base_url()."/images/jawaban/materi/".$res[0]->materi."/group/".$group_id."/".$key->jawaban_img."'>";
                         }
                         
                         $jawaban .= "
