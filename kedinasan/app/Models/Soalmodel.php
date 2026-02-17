@@ -597,7 +597,7 @@ public function getAllSoalSK() {
     }
 
     public function simpanResponSK($data) {
-        $this->db->table('respon_latihan')
+        $this->db->table('respon')
                  ->insert($data);
         return $this->db->insertID();
     }
@@ -796,6 +796,22 @@ public function getAllSoalSK() {
                         ->where('created_user_id',$user_id)
                         ->where('status_cd','normal')
                         ->update();
+    }
+
+    public function getRespon($group_id,$materi,$user_id) {
+        return $this->db->table('respon a')
+                        ->select("c.group_soal_id, c.group_nm,
+                                    COUNT(*) as total_soal,
+                                    SUM(CASE WHEN b.kunci = a.pilihan_nm THEN 1 ELSE 0 END) as total_benar,
+                                    SUM(CASE WHEN b.kunci != a.pilihan_nm THEN 1 ELSE 0 END) as total_salah")
+                        ->join('soal b','b.soal_id=a.soal_id')
+                        ->join('group_soal c','c.group_soal_id=a.group_id')
+                        ->where('a.materi',$materi)
+                        ->where('a.created_user_id',$user_id)
+                        ->where('a.status_cd', 'finish')
+                        ->whereNotIn('a.group_id', [10])
+                        ->groupBy('a.group_id')
+                        ->get();
     }
 
     public function getKolomSoalPauli() {

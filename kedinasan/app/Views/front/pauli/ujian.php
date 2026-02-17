@@ -135,10 +135,10 @@ $request = \Config\Services::request();
         <div class="content-wrapper">
             <div class="container">
                 <section class="content">
-                    <div class="row" style="display:none;">
+                    <div class="row">
                         <div class="col-md-12">
-                            <div class="bg-gray col-md-3 text-center"
-                                style="border-radius:5px;margin-left:10px;height:85px;">
+                            <div class="bg-gray col-md-12 text-center"
+                                style="border-radius:5px;height:85px;">
                                 <span style="margin-top:15px;">Waktu</span><br>
                                 <label style="font-size:30px;" id="countdown">00:00</label>
                             </div>

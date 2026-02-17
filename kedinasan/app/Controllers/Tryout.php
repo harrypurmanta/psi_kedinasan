@@ -2,17 +2,21 @@
 
 namespace App\Controllers;
 use App\Models\Soalmodel;
+use App\Models\Usersmodel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use TCPDF;
 class Tryout extends BaseController
 {
     protected $soalmodel;
+    protected $usersmodel;
     protected $session;
     public function __construct()
 	{
 		$this->session = \Config\Services::session();
         $this->session->start();
         $this->soalmodel = new Soalmodel();
+        $this->usersmodel = new Usersmodel();
 	}
 
     public function index()
@@ -323,72 +327,71 @@ class Tryout extends BaseController
         $request = \Config\Services::request();
         $user_id = $this->session->user_id;
         $materi_id = $request->uri->getSegment(3);
-        $benar_kec = 0;
-            $salah_kec = 0;
-            $benar_keb = 0;
-            $salah_keb = 0;
-            $benar_sk  = 0;
-            $salah_sk  = 0;
-            $total_skor  = 0;
-            $persen_kec  = 0;
-            $persen_kep  = 0;
-            $persen_sk = 0;
-            $ttl_benar_sk = 0;
-            
-            $kecerdasanskor = $this->soalmodel->getKecerdasanSkor($user_id,$this->session->session,$materi_id)->getResult();
-            foreach ($kecerdasanskor as $kec) {
-                if ($kec->kunci == $kec->pilihan_nm) {
-                    $benar_kec = $benar_kec + 1;
-                } else {
-                    $salah_kec = $salah_kec + 1;
-                }
-            }
-            
-            $data['persen_kec'] = ($benar_kec * 0.0025) * 100;
-            $kepskor = $this->soalmodel->getKepribadianSkor($user_id,"",$materi_id)->getResult();
-            foreach ($kepskor as $kep) {
-                if ($kep->kunci == $kep->pilihan_nm) {
-                    $benar_keb = $benar_keb + 1;
-                } else {
-                    $salah_keb = $salah_keb + 1;
-                }
-            }
-            $data['persen_kep'] = ($benar_keb * 0.005) * 100;
-
-            $klm = $this->soalmodel->getKolomSoal()->getResult();
-            foreach ($klm as $key) {
-                $benar = 0;
-                $salah = 0;
-                $soal_terjawab = 0;
-                $res_responSK = $this->soalmodel->getResponSikapKerja($user_id,$this->session->session,$key->kolom_id,$materi_id)->getResult();
-                if (count($res_responSK)>0) {
-                    $soal_terjawab = count($res_responSK);
-                    foreach ($res_responSK as $rSK) {
-                        // $soal_terjawab = $soal_terjawab + 1;
-                        if ($rSK->pilihan_respon == $rSK->kunci) {
-                            $benar = $benar + 1;
-                        } else {
-                            $salah = $salah + 1;
-                        }
-                    }
-                } else {
-                    $soal_terjawab = $soal_terjawab;
-                }
-                $ttl_benar_sk = $ttl_benar_sk + $benar;
-            }
-            $data['persen_sk'] = ($ttl_benar_sk * 0.0005) * 100;
-
-                $data['total_skor'] = $data['persen_sk'] + $data['persen_kep'] + $data['persen_kec'];
-            if ($materi_id == 10) {
-                $ressession = $this->soalmodel->getSessionSkor($this->session->user_id)->getResult();
-                foreach ($ressession as $sesskr) {
-                    $persen_kec  = $sesskr->skor_kec; 
-                    $persen_kep  = $sesskr->skor_kep;
-                    $persen_sk   = $sesskr->skor_sk;
-                    $data['total_skor'] = $persen_sk + $persen_kep + $persen_kec;
-                }
-            }
+        $group_id = $request->uri->getSegment(4);
+        $getRespon = $this->soalmodel->getRespon($group_id,$materi_id,$user_id)->getResult();
+        $data = [
+            "hasil" => $getRespon
+        ];
+        
         return view('front/hasiltryout',$data);
+    }
+
+    public function kirimemail() {
+        $mailService = \Config\Services::email();
+        $user_id = $this->session->user_id;
+        $materi_id = $this->request->getPost("materi");
+        $group_id = $this->request->getPost("group_id");
+        $mhs = $this->usersmodel->getbyUserId($user_id)->getResult();
+        $getRespon = $this->soalmodel->getRespon($group_id,$materi_id,$user_id)->getResult();
+
+        $tabelHasil = '
+            <h3 style="text-align:center;">Rekap Nilai per Paket</h3>
+            <table border="1" cellpadding="5" cellspacing="0" width="100%">
+                <tr>
+                    <th width="40%" align="center"><b>Paket</b></th>
+                    <th width="30%" align="center"><b>Benar</b></th>
+                    <th width="30%" align="center"><b>Salah</b></th>
+                </tr>';
+
+        foreach ($getRespon as $key) {
+            $tabelHasil .= '
+            <tr>
+                <td align="center">'.$key->group_nm.'</td>
+                <td align="center">'.$key->total_benar.'</td>
+                <td align="center">'.$key->total_salah.'</td>
+            </tr>';
+        }
+
+        $tabelHasil .= '</table>';
+
+        $filename = str_replace(" ", "_", $mhs[0]->person_nm)."_materi".$materi_id.".pdf";
+   
+        $pdf = new TCPDF('P', PDF_UNIT, 'A4', true, 'UTF-8', false);
+        $pdf->SetCreator(PDF_CREATOR);
+		$pdf->SetAuthor('Bintang Timur Prestasi');
+		$pdf->SetTitle('Hasil Tes');
+		$pdf->SetSubject('Hasil Tes');
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(TRUE, 10);
+        $pdf->SetImageScale(1.25); // Skala gambar
+        $pdf->addPage();
+
+        $pdf->writeHTML($tabelHasil, true, false, true, false, '');
+
+        $filePath = WRITEPATH . 'upload/' . $filename;
+        $pdf->Output($filePath, 'F'); // simpan ke file
+
+        
+        $mailService->setTo($mhs[0]->email);
+            $mailService->setFrom('admin@bintangtimurprestasi.com', 'Hasil');
+            $mailService->attach($filePath);
+            $mailService->setSubject('Hasil');
+            $mailService->setMessage('Terima kasih telah mengikuti tryout Bintang Timur Prestasi. berikut kami kirimkan hasil anda');
+            $sendit = $mailService->send();
+            echo json_encode($sendit);
+
     }
 
 }
