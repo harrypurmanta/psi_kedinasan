@@ -48,12 +48,12 @@ class Users extends BaseController
         $materi_id = $this->request->getPost("materi_id");
         $group_id = $this->request->getPost("group_id");
         $user_id = $this->request->getPost("user_id");
-
+        
         if ($group_id == "semua") {
             $data = [
                 "status_cd" => "nullified"
             ];
-            $reset = $this->soalmodel->resetsemua($materi_id,$data,$user_id);
+            $reset = $this->soalmodel->resetsemua($materi_id, $data, $user_id);
         } else {
             $data = [
                 "status_cd" => "nullified"

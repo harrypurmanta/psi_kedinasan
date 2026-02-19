@@ -779,11 +779,11 @@ public function getAllSoalSK() {
                         ->update();
     }
 
-    public function resetsemua($materi_id,$data,$user_id) {
+    public function resetsemua($materi_id, $data, $user_id) {
         return $this->db->table('respon')
                         ->set($data)
                         ->where('materi',$materi_id)
-                        ->where('status_cd','normal')
+                        ->whereIn('status_cd',['normal','finish'])
                         ->where('created_user_id',$user_id)
                         ->update();
     }

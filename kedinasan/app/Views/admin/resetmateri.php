@@ -125,14 +125,8 @@
 </head>
 <body class="hold-transition layout-top-nav">
 <div class="wrapper">
- <!-- Navbar -->
- 
-
  <?= $this->include('admin/navbar') ?>
-  <!-- /.navbar -->
-<!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
@@ -165,10 +159,6 @@
                   <tr>
                     <th style="text-align:center;">No.</th>
                     <th style="text-align:center;">Materi</th>
-                    <th style="text-align:center;">Passhand</th>
-                    <th style="text-align:center;">Kecerdasan</th>
-                    <th style="text-align:center;">Kepribadian</th>
-                    <th style="text-align:center;">Sikap Kerja</th>
                     <th style="text-align:center;">Semua</th>
                   </tr>
                   </thead>
@@ -181,15 +171,7 @@
                   <tr>
                     <td style="text-align:center;"><?= $no++ ?></td>
                     <td><?= $key->materi_nm ?></td>
-                    <td style="text-align:center;"><?php if ($key->materi_id == 1) {
-                        echo "<button class='btn btn-primary' onclick='resetrespon($key->materi_id,1)''>Reset</button>";
-                    } ?></td>
-                    <td style="text-align:center;"><button class="btn btn-primary" onclick="resetrespon(<?= $key->materi_id ?>,2)">Reset</button></td>
-                    <td style="text-align:center;"><button class="btn btn-primary" onclick="resetrespon(<?= $key->materi_id ?>,3)">Reset</button></td>
-                    <td style="text-align:center;"><?php if ($key->materi_id == 1) {
-                        echo "<button class='btn btn-primary' onclick='resetrespon($key->materi_id,4)'>Reset</button>";
-                    } ?></td>
-                    <td style="text-align:center;"><button class="btn btn-primary" onclick="resetrespon(<?= $key->materi_id ?>,'semua')">Reset Semua</button></td>
+                    <td style="text-align:center;"><button class="btn btn-primary" onclick="resetrespon(<?= $key->materi_id ?>,'semua')">Reset</button></td>
                   </tr>
                     <?php
                         }
@@ -271,6 +253,7 @@
 
   function resetrespon(materi_id,group_id) {
     let text = "Apakah anda yakin mereset data ini ?";
+    var user_id = <?= $user_id ?>;
     if (confirm(text) == true) {
         $.ajax({
             url: "<?= base_url('admin/users/resetrespon') ?>",
@@ -278,7 +261,8 @@
             dataType: "json",
             data: {
             "materi_id": materi_id,
-            "group_id": group_id
+            "group_id": group_id,
+            "user_id": user_id
             },
             beforeSend: function() {
                 $("#loader-wrapper").removeClass("d-none")

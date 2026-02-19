@@ -34,27 +34,14 @@
                                 $user_id = $this->session->user_id;
                                 $db = db_connect();
                                 foreach ($materi as $key) {
-                                    if ($key->materi_id == 1) {
-                                        $group_id = 1;
-                                    } else {
-                                        $group_id = 2;
-                                    }
 
-                                    
-                                    // $query = $db->query("SELECT * FROM respon a LEFT JOIN times_remaining b ON b.user_id = a.created_user_id AND b.materi_id = a.materi WHERE a.materi = $key->materi_id AND a.created_user_id = $user_id AND a.status_cd = 'normal'")->getResultArray();
-                                    $query = $db->query("SELECT * FROM respon WHERE materi = $key->materi_id AND created_user_id = $user_id AND status_cd = 'normal'")->getResultArray();
+                                    $query = $db->query("SELECT * FROM respon WHERE materi = $key->materi_id AND created_user_id = $user_id AND status_cd = 'finish'")->getResultArray();
                                     if (count($query)>0) {
-                                        // if ($query[0]['isFinish'] == "finish") {
-                                        //     $click = base_url()."/materi/hasiltryout/".$key->materi_id;
-                                        //     $class_bg = "bg-green";
-                                        // } else {
-                                        //     $click = base_url()."/materi/pilihanMateri/".$key->materi_id."/".$group_id;
-                                        //     $class_bg = "bg-orange";
                                         // }
-                                        $click = base_url()."/materi/hasiltryout/".$key->materi_id;
+                                        $click = base_url()."/tryout/hasiltryout/".$key->materi_id."/10";
                                         $class_bg = "bg-green";
                                     } else {
-                                        $click = base_url()."/materi/pilihanMateri/".$key->materi_id."/".$group_id;
+                                        $click = base_url()."/materi/pilihanMateri/".$key->materi_id."/1";
                                         $class_bg = "bg-gray";
                                     }
                             ?>
