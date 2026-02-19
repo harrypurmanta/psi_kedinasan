@@ -873,4 +873,65 @@ public function getAllSoalSK() {
                         ->where('created_user_id',$user_id)
                         ->update();
     }
+
+    public function getHasilPauliByUserUsed($user_id, $sk_group_id, $materi_id, $used)
+    {
+        $responSub = $this->db->table('respon')
+            ->select('respon_id, soal_id, pilihan_nm')
+            ->where('created_user_id', $user_id)
+            ->where('used', $used)
+            // ->where('materi', $materi_id)
+            ->where('status_cd', 'finish')
+            ->getCompiledSelect();
+
+        return $this->db->table('kolom_pauli k')
+            ->select([
+                'k.kolom_id', 'k.kolom_nm',
+
+                'COUNT(c.soal_id) AS total_soal',
+
+                'COALESCE(SUM(CASE 
+                    WHEN r.pilihan_nm IS NOT NULL AND r.pilihan_nm <> "" 
+                    THEN 1 ELSE 0 
+                END),0) AS terjawab',
+
+                'COALESCE(SUM(CASE 
+                    WHEN r.pilihan_nm IS NULL OR r.pilihan_nm = "" 
+                    THEN 1 ELSE 0 
+                END),0) AS tidak_terjawab',
+
+                'COALESCE(SUM(CASE 
+                    WHEN r.pilihan_nm IS NOT NULL 
+                    AND r.pilihan_nm <> "" 
+                    AND r.pilihan_nm <> c.kunci 
+                    THEN 1 ELSE 0 
+                END),0) AS salah'
+            ])
+            ->join(
+                'soal c',
+                'c.kolom_id = k.kolom_id
+                AND c.group_id = 10
+                AND c.status_cd = "normal"
+                AND c.materi = '.$this->db->escape($materi_id).'
+                AND c.sk_group_id = '.$this->db->escape($sk_group_id),
+                'left'
+            )
+            ->join(
+                "($responSub) r",
+                'r.soal_id = c.soal_id',
+                'left'
+            )
+            ->groupBy('k.kolom_id')
+            ->orderBy('k.kolom_id', 'ASC')
+            ->get();
+    }
+
+    public function getLastUsedPauli($user_id, $group_id, $materi) {
+        return $this->db->table('respon')
+            ->selectMax('used')
+            ->where('created_user_id', $user_id)
+            ->where('group_id', $group_id)
+            ->where('materi', $materi)
+            ->get();
+    }
 }

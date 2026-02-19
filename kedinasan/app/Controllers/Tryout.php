@@ -329,8 +329,24 @@ class Tryout extends BaseController
         $materi_id = $request->uri->getSegment(3);
         $group_id = $request->uri->getSegment(4);
         $getRespon = $this->soalmodel->getRespon($group_id,$materi_id,$user_id)->getResult();
+
+        $hasil = [];
+        // $lastUsed = $this->soalmodel->getLastUsedPauli($user_id, $group_id, $materi_id)->getRow();
+        // $user = $this->usermodel->getbyUserId($user_id)->getResult();
+        for ($i = 1; $i <= 4; $i++) {
+            $hasil[$i] = $this->soalmodel
+                ->getHasilPauliByUserUsed(
+                    $user_id,
+                    $i, // sk_group_id,
+                    $materi_id,
+                    1
+                )
+                ->getResult();
+        }
+        
         $data = [
-            "hasil" => $getRespon
+            "hasil" => $hasil,
+            "getRespon" => $getRespon
         ];
         
         return view('front/hasiltryout',$data);
